@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hacker_news/Model/app_bar.dart';
+import 'package:hacker_news/Model/bottom_nav.dart';
 import 'package:hacker_news/View/Splash_screen/Splash_screen.dart';
 import 'package:hacker_news/routes.dart';
 
@@ -34,34 +36,11 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
-  void _decrement() {
-    setState(() {
-      _counter = _counter - 2;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Row(
-          children: [
-            const Icon(Icons.home_max_outlined),
-            Text(
-              widget.title,
-              style: const TextStyle(fontStyle: FontStyle.italic),
-            ),
-          ],
-        ),
+      appBar: const CustomAppBar(
+        title: 'Hacker News Home',
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -72,7 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 'You have pushed the button this many times:',
               ),
               Text(
-                '$_counter',
+                '0',
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
               const SizedBox(
@@ -82,27 +61,8 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
       ),
-      bottomNavigationBar: BottomAppBar(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              FloatingActionButton(
-                onPressed: _incrementCounter,
-                tooltip: 'Increment',
-                heroTag: 'increment', // Unique hero tag
-                child: const Icon(Icons.add),
-              ),
-              const Spacer(),
-              FloatingActionButton(
-                onPressed: _decrement,
-                tooltip: 'Decrement',
-                heroTag: 'decrement', // Unique hero tag
-                child: const Icon(Icons.remove),
-              ),
-            ],
-          ),
-        ),
+      bottomNavigationBar: const CustomBottomNavigationBar(
+        selectedIndex: 1,
       ),
     );
   }

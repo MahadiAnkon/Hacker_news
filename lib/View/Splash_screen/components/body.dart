@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hacker_news/View/Home_page/home_page.dart';
 import 'dart:async';
 import 'package:hacker_news/size.dart';
 
@@ -18,8 +19,9 @@ class _BodyState extends State<Body> {
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 3), () {
-      Navigator.pushReplacementNamed(context, '/');
+    Timer(const Duration(seconds: 2), () {
+      Navigator.pushNamedAndRemoveUntil(
+          context, HomePage.routeName, (_) => false);
     });
   }
 
