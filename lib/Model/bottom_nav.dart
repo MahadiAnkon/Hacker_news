@@ -16,7 +16,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
             context, HomePage.routeName, (_) => false);
         break;
       case 1:
-        Navigator.pushNamed(context, '/');
+        //Navigator.pushNamed(context, '/');
         break;
     }
   }

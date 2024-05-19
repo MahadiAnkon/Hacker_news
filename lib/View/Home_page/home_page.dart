@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hacker_news/Model/app_bar.dart';
-import 'package:hacker_news/Model/bottom_nav.dart';
 import 'package:hacker_news/View/Home_page/components/body.dart';
 
 class HomePage extends StatelessWidget {
@@ -14,9 +13,6 @@ class HomePage extends StatelessWidget {
         title: 'Hacker News',
       ),
       body: Body(),
-      bottomNavigationBar: CustomBottomNavigationBar(
-        selectedIndex: 0,
-      ),
     );
   }
 }
