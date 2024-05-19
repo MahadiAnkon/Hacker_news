@@ -17,7 +17,7 @@ class Body extends StatelessWidget {
             children: [
               Top(),
               SizedBox(height: 20),
-              latest(),
+              Latest(),
             ],
           ),
         ),

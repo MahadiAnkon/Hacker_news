@@ -109,6 +109,7 @@ class _LatestNewsPageState extends State<LatestNewsPage> {
                         news: News(
                           title: story['title'],
                           author: story['by'],
+                          text: story['text'] ?? '',
                           imageUrl: 'https://via.placeholder.com/400',
                           time: DateTime.fromMillisecondsSinceEpoch(
                               story['time'] * 1000),

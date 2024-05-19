@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:hacker_news/Controller/news.dart';
 import 'package:hacker_news/Model/api.dart';
 import 'package:hacker_news/Model/news_card.dart';
 import 'package:hacker_news/View/Latest_news/latest_news.dart';
 import 'package:hacker_news/size.dart';
+import 'package:hacker_news/Controller/news.dart';
 
-class latest extends StatelessWidget {
-  const latest({super.key});
+class Latest extends StatelessWidget {
+  const Latest({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -66,6 +66,7 @@ class latest extends StatelessWidget {
                               news: News(
                                 title: story['title'],
                                 author: story['by'],
+                                text: story['text'] ?? '', // Handle cases where 'text' might be null
                                 imageUrl: 'https://via.placeholder.com/400',
                                 time: DateTime.fromMillisecondsSinceEpoch(
                                     story['time'] * 1000),

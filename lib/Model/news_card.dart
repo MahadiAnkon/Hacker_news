@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hacker_news/Controller/news.dart';
+import 'package:hacker_news/View/Details/details_news.dart';
 import 'package:hacker_news/size.dart';
 
 class NewsCard extends StatelessWidget {
@@ -18,7 +19,12 @@ class NewsCard extends StatelessWidget {
         width: double.infinity,
         child: GestureDetector(
           onTap: () {
-            Navigator.pushNamed(context, '/');
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => NewsDetailPage(news: news),
+              ),
+            );
           },
           child: AspectRatio(
             aspectRatio: 1.2,
