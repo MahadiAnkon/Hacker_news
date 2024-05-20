@@ -1,13 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:hacker_news/Controller/news.dart';
 import 'package:hacker_news/Model/api.dart';
+import 'package:hacker_news/Model/cache.dart';
 import 'package:hacker_news/Model/news_card.dart';
 import 'package:hacker_news/Model/parser.dart';
 import 'package:hacker_news/View/Top_news/top_news.dart';
 import 'package:hacker_news/size.dart';
 
-class Top extends StatelessWidget {
+class Top extends StatefulWidget {
   const Top({super.key});
+
+  @override
+  TopState createState() => TopState();
+}
+
+class TopState extends State<Top> {
+  late Future<List<dynamic>> _topStoriesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _topStoriesFuture = ApiService.fetchTopStories();
+  }
+
+  Future<void> refresh() async {
+    setState(() {
+      _topStoriesFuture = ApiService.fetchTopStories();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,43 +54,50 @@ class Top extends StatelessWidget {
         ),
         SizedBox(height: getProportionateScreenHeight(10)),
         FutureBuilder(
-          future: ApiService.fetchTopStories(),
+          future: _topStoriesFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
               return Text('Error: ${snapshot.error}');
             } else {
-              List<dynamic> storyIds = snapshot.data!;
+              List<dynamic> storyIds = snapshot.data!.take(5).toList();
               return SizedBox(
-                height: getProportionateScreenHeight(300),
+                height: getProportionateScreenHeight(260),
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: storyIds.length,
                   itemBuilder: (context, index) {
                     return FutureBuilder(
-                      future: ApiService.fetchStoryDetails(storyIds[index]),
+                      future: CacheService.getStory(storyIds[index]),
                       builder: (context, storySnapshot) {
                         if (storySnapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return const Center(
-                              child: CircularProgressIndicator());
+                          return SizedBox(
+                            width: getProportionateScreenWidth(300),
+                            child: const Center(child: CircularProgressIndicator()),
+                          );
                         } else if (storySnapshot.hasError) {
                           return Text('Error: ${storySnapshot.error}');
                         } else {
                           Map<String, dynamic> story = storySnapshot.data!;
-                          List<int> commentIds = List<int>.from(story['kids'] ?? []);
+                          List<int> commentIds =
+                              List<int>.from(story['kids'] ?? []);
                           return FutureBuilder(
-                            future: ApiService.fetchComments(commentIds),
+                            future: CacheService.getComments(commentIds),
                             builder: (context, commentSnapshot) {
                               if (commentSnapshot.connectionState ==
                                   ConnectionState.waiting) {
-                                return const Center(
-                                    child: CircularProgressIndicator());
+                                return SizedBox(
+                                  width: getProportionateScreenWidth(300),
+                                  child: const Center(
+                                      child: CircularProgressIndicator()),
+                                );
                               } else if (commentSnapshot.hasError) {
                                 return Text('Error: ${commentSnapshot.error}');
                               } else {
-                                List<Map<String, dynamic>> comments = commentSnapshot.data!;
+                                List<Map<String, dynamic>> comments =
+                                    commentSnapshot.data!;
                                 return SizedBox(
                                   width: getProportionateScreenWidth(300),
                                   child: NewsCard(
@@ -82,8 +109,9 @@ class Top extends StatelessWidget {
                                           story['time'] * 1000),
                                       comments: comments
                                           .map((comment) => {
-                                                'author': comment['by'],
-                                                'text': parseHtmlString(comment['text'] ?? '')
+                                                'author': comment['by'] ?? 'Unknown commenter',
+                                                'text': parseHtmlString(
+                                                    comment['text'] ?? 'no comment',)
                                               })
                                           .toList(),
                                       commentsCount: comments.length,

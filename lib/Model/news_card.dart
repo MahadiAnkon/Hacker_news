@@ -62,7 +62,7 @@ class NewsCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 5),
+                    const Spacer(),
                     Row(
                       children: [
                         const Icon(
@@ -86,6 +86,9 @@ class NewsCard extends StatelessWidget {
                             color: Colors.black54,
                           ),
                         ),
+                        const SizedBox(
+                          height: 60,
+                        )
                       ],
                     ),
                   ],

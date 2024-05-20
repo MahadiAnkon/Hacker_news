@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hacker_news/Controller/news.dart';
+import 'package:hacker_news/Model/api.dart';
+import 'package:hacker_news/Model/cache.dart';
 import 'package:hacker_news/Model/news_card.dart';
 import 'package:hacker_news/Model/parser.dart';
 import 'package:hacker_news/size.dart';
-import 'package:hacker_news/Model/api.dart'; // Import ApiService
 
 class LatestNewsPage extends StatefulWidget {
   static String routeName = '/latestNews';
@@ -35,24 +36,23 @@ class _LatestNewsPageState extends State<LatestNewsPage> {
 
     try {
       List<dynamic> fetchedStoryIds = await ApiService.fetchLatestStories();
-      int nextPage = currentPage + 1;
-      List<dynamic> nextStories =
-          fetchedStoryIds.skip(currentPage * 5).take(5).toList();
+      int start = currentPage * 5;
+      List<dynamic> nextStories = fetchedStoryIds.skip(start).take(5).toList();
 
       setState(() {
         if (nextStories.isEmpty) {
           hasMoreStories = false;
         } else {
           storyIds.addAll(nextStories);
-          currentPage = nextPage;
+          currentPage += 1;
         }
-        isLoading = false;
       });
     } catch (e) {
+      throw Exception('Failed to load latest stories');
+    } finally {
       setState(() {
         isLoading = false;
       });
-      throw Exception('Failed to load latest stories');
     }
   }
 
@@ -79,7 +79,7 @@ class _LatestNewsPageState extends State<LatestNewsPage> {
               return const Center(child: CircularProgressIndicator());
             } else {
               return FutureBuilder(
-                future: ApiService.fetchStoryDetails(storyIds[index]),
+                future: CacheService.getStory(storyIds[index]),
                 builder: (context, storySnapshot) {
                   if (storySnapshot.connectionState ==
                       ConnectionState.waiting) {
@@ -93,20 +93,22 @@ class _LatestNewsPageState extends State<LatestNewsPage> {
                     Map<String, dynamic> story = storySnapshot.data!;
                     List<int> commentIds = List<int>.from(story['kids'] ?? []);
                     return FutureBuilder(
-                      future: ApiService.fetchComments(commentIds),
+                      future: CacheService.getComments(commentIds),
                       builder: (context, commentSnapshot) {
                         if (commentSnapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return const Center(
-                              child: CircularProgressIndicator());
+                          return const SizedBox(
+                            height: 200,
+                            child: Center(child: CircularProgressIndicator()),
+                          );
                         } else if (commentSnapshot.hasError) {
                           return Text('Error: ${commentSnapshot.error}');
                         } else {
                           List<Map<String, dynamic>> comments =
                               commentSnapshot.data!;
                           return Padding(
-                            padding: EdgeInsets.all(
-                                getProportionateScreenWidth(10)),
+                            padding:
+                                EdgeInsets.all(getProportionateScreenWidth(10)),
                             child: NewsCard(
                               news: News(
                                 title: story['title'] ?? 'No title',
@@ -116,9 +118,11 @@ class _LatestNewsPageState extends State<LatestNewsPage> {
                                     story['time'] * 1000),
                                 comments: comments
                                     .map((comment) => {
-                                          'author': comment['by'],
+                                          'author': comment['by'] ??
+                                              'Unknown commenter',
                                           'text': parseHtmlString(
-                                              comment['text'] ?? '')
+                                            comment['text'] ?? 'no comment',
+                                          )
                                         })
                                     .toList(),
                                 commentsCount: comments.length,
