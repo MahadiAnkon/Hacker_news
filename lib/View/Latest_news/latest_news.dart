@@ -83,9 +83,9 @@ class _LatestNewsPageState extends State<LatestNewsPage> {
                 builder: (context, storySnapshot) {
                   if (storySnapshot.connectionState ==
                       ConnectionState.waiting) {
-                    return const SizedBox(
-                      height: 200,
-                      child: Center(child: CircularProgressIndicator()),
+                    return SizedBox(
+                      height: getProportionateScreenHeight(200),
+                      child: const Center(child: CircularProgressIndicator()),
                     );
                   } else if (storySnapshot.hasError) {
                     return Text('Error: ${storySnapshot.error}');
@@ -97,9 +97,10 @@ class _LatestNewsPageState extends State<LatestNewsPage> {
                       builder: (context, commentSnapshot) {
                         if (commentSnapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return const SizedBox(
-                            height: 200,
-                            child: Center(child: CircularProgressIndicator()),
+                          return SizedBox(
+                            height: getProportionateScreenHeight(200),
+                            child: const Center(
+                                child: CircularProgressIndicator()),
                           );
                         } else if (commentSnapshot.hasError) {
                           return Text('Error: ${commentSnapshot.error}');

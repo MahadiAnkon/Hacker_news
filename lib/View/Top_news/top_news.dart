@@ -4,6 +4,7 @@ import 'package:hacker_news/Model/api.dart';
 import 'package:hacker_news/Model/cache.dart';
 import 'package:hacker_news/Model/news_card.dart';
 import 'package:hacker_news/Model/parser.dart';
+import 'package:hacker_news/size.dart';
 
 class TopNewsPage extends StatefulWidget {
   static String routeName = '/topNews';
@@ -97,10 +98,10 @@ class _TopNewsPageState extends State<TopNewsPage> {
           itemCount: storyIds.length + (hasMoreStories ? 1 : 0),
           itemBuilder: (context, index) {
             if (index == storyIds.length) {
-              return const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Center(
-                  child: CircularProgressIndicator(),
+              return  Padding(
+                padding: EdgeInsets.all(getProportionateScreenHeight(8.0)),
+                child: const Center(
+                  child:  CircularProgressIndicator(),
                 ),
               );
             } else {
@@ -109,9 +110,9 @@ class _TopNewsPageState extends State<TopNewsPage> {
                 builder: (context, storySnapshot) {
                   if (storySnapshot.connectionState ==
                       ConnectionState.waiting) {
-                    return const SizedBox(
-                      height: 200,
-                      child: Center(child: CircularProgressIndicator()),
+                    return  SizedBox(
+                      height: getProportionateScreenHeight(200),
+                      child:const Center(child: CircularProgressIndicator()),
                     );
                   } else if (storySnapshot.hasError) {
                     return Text('Error: ${storySnapshot.error}');
@@ -123,9 +124,9 @@ class _TopNewsPageState extends State<TopNewsPage> {
                       builder: (context, commentSnapshot) {
                         if (commentSnapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return const SizedBox(
-                            height: 200,
-                            child: Center(child: CircularProgressIndicator()),
+                          return  SizedBox(
+                            height: getProportionateScreenHeight(200),
+                            child:const Center(child: CircularProgressIndicator()),
                           );
                         } else if (commentSnapshot.hasError) {
                           return Text('Error: ${commentSnapshot.error}');
@@ -133,7 +134,7 @@ class _TopNewsPageState extends State<TopNewsPage> {
                           List<Map<String, dynamic>> comments =
                               commentSnapshot.data!;
                           return Padding(
-                            padding: const EdgeInsets.all(10),
+                            padding:  EdgeInsets.all(getProportionateScreenHeight(10)),
                             child: NewsCard(
                               news: News(
                                 title: story['title'] ?? 'No title',

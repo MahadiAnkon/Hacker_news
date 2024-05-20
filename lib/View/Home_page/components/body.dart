@@ -5,7 +5,7 @@ import 'package:hacker_news/View/Home_page/components/top.dart';
 import 'package:hacker_news/size.dart';
 
 class Body extends StatefulWidget {
-  const Body({Key? key}) : super(key: key);
+  const Body({super.key});
 
   @override
   _BodyState createState() => _BodyState();
