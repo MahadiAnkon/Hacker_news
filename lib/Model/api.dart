@@ -35,4 +35,17 @@ class ApiService {
       throw Exception('Failed to load story details');
     }
   }
+
+  static Future<List<Map<String, dynamic>>> fetchComments(List<int> commentIds) async {
+    List<Map<String, dynamic>> comments = [];
+    for (int id in commentIds) {
+      final response = await http.get(Uri.parse(
+          'https://hacker-news.firebaseio.com/v0/item/$id.json?print=pretty'));
+      if (response.statusCode == 200) {
+        Map<String, dynamic> comment = json.decode(response.body);
+        comments.add(comment);
+      }
+    }
+    return comments;
+  }
 }

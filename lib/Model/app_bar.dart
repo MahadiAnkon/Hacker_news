@@ -4,12 +4,16 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final bool back = false;
 
-  const CustomAppBar({super.key, required this.title, back,});
+  const CustomAppBar({
+    super.key,
+    required this.title,
+    back,
+  });
   @override
   Widget build(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: back,
-      backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      backgroundColor: Theme.of(context).colorScheme.primary,
       title: Row(
         children: [
           const Icon(Icons.home_max_outlined),

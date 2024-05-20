@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hacker_news/Controller/news.dart';
 import 'package:hacker_news/Model/news_card.dart';
+import 'package:hacker_news/Model/parser.dart';
 import 'package:hacker_news/size.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:hacker_news/Model/api.dart'; // Import ApiService
 
 class LatestNewsPage extends StatefulWidget {
   static String routeName = '/latestNews';
@@ -33,13 +33,11 @@ class _LatestNewsPageState extends State<LatestNewsPage> {
       isLoading = true;
     });
 
-    final response = await http.get(Uri.parse(
-        'https://hacker-news.firebaseio.com/v0/newstories.json?print=pretty'));
-    if (response.statusCode == 200) {
-      List<dynamic> fetchedStoryIds = json.decode(response.body);
+    try {
+      List<dynamic> fetchedStoryIds = await ApiService.fetchLatestStories();
       int nextPage = currentPage + 1;
       List<dynamic> nextStories =
-          fetchedStoryIds.skip(currentPage * 1).take(5).toList();
+          fetchedStoryIds.skip(currentPage * 5).take(5).toList();
 
       setState(() {
         if (nextStories.isEmpty) {
@@ -50,21 +48,11 @@ class _LatestNewsPageState extends State<LatestNewsPage> {
         }
         isLoading = false;
       });
-    } else {
+    } catch (e) {
       setState(() {
         isLoading = false;
       });
       throw Exception('Failed to load latest stories');
-    }
-  }
-
-  Future<Map<String, dynamic>> fetchStoryDetails(int id) async {
-    final response = await http.get(Uri.parse(
-        'https://hacker-news.firebaseio.com/v0/item/$id.json?print=pretty'));
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else {
-      throw Exception('Failed to load story details');
     }
   }
 
@@ -91,7 +79,7 @@ class _LatestNewsPageState extends State<LatestNewsPage> {
               return const Center(child: CircularProgressIndicator());
             } else {
               return FutureBuilder(
-                future: fetchStoryDetails(storyIds[index]),
+                future: ApiService.fetchStoryDetails(storyIds[index]),
                 builder: (context, storySnapshot) {
                   if (storySnapshot.connectionState ==
                       ConnectionState.waiting) {
@@ -103,18 +91,42 @@ class _LatestNewsPageState extends State<LatestNewsPage> {
                     return Text('Error: ${storySnapshot.error}');
                   } else {
                     Map<String, dynamic> story = storySnapshot.data!;
-                    return Padding(
-                      padding: EdgeInsets.all(getProportionateScreenWidth(10)),
-                      child: NewsCard(
-                        news: News(
-                          title: story['title'],
-                          author: story['by'],
-                          text: story['text'] ?? '',
-                          imageUrl: 'https://via.placeholder.com/400',
-                          time: DateTime.fromMillisecondsSinceEpoch(
-                              story['time'] * 1000),
-                        ),
-                      ),
+                    List<int> commentIds = List<int>.from(story['kids'] ?? []);
+                    return FutureBuilder(
+                      future: ApiService.fetchComments(commentIds),
+                      builder: (context, commentSnapshot) {
+                        if (commentSnapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        } else if (commentSnapshot.hasError) {
+                          return Text('Error: ${commentSnapshot.error}');
+                        } else {
+                          List<Map<String, dynamic>> comments =
+                              commentSnapshot.data!;
+                          return Padding(
+                            padding: EdgeInsets.all(
+                                getProportionateScreenWidth(10)),
+                            child: NewsCard(
+                              news: News(
+                                title: story['title'] ?? 'No title',
+                                author: story['by'] ?? 'Unknown author',
+                                text: story['text'],
+                                time: DateTime.fromMillisecondsSinceEpoch(
+                                    story['time'] * 1000),
+                                comments: comments
+                                    .map((comment) => {
+                                          'author': comment['by'],
+                                          'text': parseHtmlString(
+                                              comment['text'] ?? '')
+                                        })
+                                    .toList(),
+                                commentsCount: comments.length,
+                              ),
+                            ),
+                          );
+                        }
+                      },
                     );
                   }
                 },

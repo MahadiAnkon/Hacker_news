@@ -1,15 +1,17 @@
 class News {
   final String title;
   final String author;
-  final String imageUrl;
   final DateTime time;
-  final String text;
+  final String? text;
+  final int commentsCount;
+  final List<Map<String, dynamic>> comments;
 
   News({
     required this.title,
     required this.author,
-    required this.imageUrl,
     required this.time,
-    required this.text,
+    this.text,
+    required this.commentsCount,
+    required this.comments,
   });
 }

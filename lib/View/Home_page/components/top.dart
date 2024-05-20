@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hacker_news/Controller/news.dart';
 import 'package:hacker_news/Model/api.dart';
 import 'package:hacker_news/Model/news_card.dart';
+import 'package:hacker_news/Model/parser.dart';
 import 'package:hacker_news/View/Top_news/top_news.dart';
 import 'package:hacker_news/size.dart';
 
@@ -58,18 +59,39 @@ class Top extends StatelessWidget {
                           return Text('Error: ${storySnapshot.error}');
                         } else {
                           Map<String, dynamic> story = storySnapshot.data!;
-                          return SizedBox(
-                            width: getProportionateScreenWidth(300),
-                            child: NewsCard(
-                              news: News(
-                                title: story['title'],
-                                author: story['by'],
-                                text: story['text'] ?? '',
-                                imageUrl: 'https://via.placeholder.com/400',
-                                time: DateTime.fromMillisecondsSinceEpoch(
-                                    story['time'] * 1000),
-                              ),
-                            ),
+                          List<int> commentIds = List<int>.from(story['kids'] ?? []);
+                          return FutureBuilder(
+                            future: ApiService.fetchComments(commentIds),
+                            builder: (context, commentSnapshot) {
+                              if (commentSnapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const Center(
+                                    child: CircularProgressIndicator());
+                              } else if (commentSnapshot.hasError) {
+                                return Text('Error: ${commentSnapshot.error}');
+                              } else {
+                                List<Map<String, dynamic>> comments = commentSnapshot.data!;
+                                return SizedBox(
+                                  width: getProportionateScreenWidth(300),
+                                  child: NewsCard(
+                                    news: News(
+                                      title: story['title'] ?? 'No title',
+                                      author: story['by'] ?? 'Unknown author',
+                                      text: story['text'],
+                                      time: DateTime.fromMillisecondsSinceEpoch(
+                                          story['time'] * 1000),
+                                      comments: comments
+                                          .map((comment) => {
+                                                'author': comment['by'],
+                                                'text': parseHtmlString(comment['text'] ?? '')
+                                              })
+                                          .toList(),
+                                      commentsCount: comments.length,
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
                           );
                         }
                       },

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hacker_news/Controller/news.dart';
 import 'package:hacker_news/View/Details/details_news.dart';
 import 'package:hacker_news/size.dart';
+import 'package:intl/intl.dart';
 
 class NewsCard extends StatelessWidget {
   final News news;
@@ -13,6 +14,9 @@ class NewsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final formattedTime = DateFormat('HH:mm').format(news.time);
+    final formattedDate = DateFormat('d MMM, yyyy').format(news.time);
+
     return Padding(
       padding: EdgeInsets.all(getProportionateScreenWidth(10)),
       child: SizedBox(
@@ -33,73 +37,56 @@ class NewsCard extends StatelessWidget {
                 color: Colors.redAccent.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(15),
               ),
-              child: Hero(
-                tag: news.title,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Stack(
-                      children: <Widget>[
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.network(
-                            news.imageUrl,
-                            fit: BoxFit.cover,
-                            height: getProportionateScreenHeight(110),
-                            width: double.infinity,
+                    Text(
+                      news.title,
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      'by ${news.author}',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.black54,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 5),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.comment,
+                          size: 16,
+                          color: Colors.black54,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${news.commentsCount}',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.black54,
                           ),
                         ),
-                        Positioned(
-                          top: 10,
-                          left: 10,
-                          child: Text(
-                            news.time.toIso8601String(),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              backgroundColor: Colors.black54,
-                              fontSize: 14,
-                            ),
+                        const Spacer(),
+                        Text(
+                          '$formattedTime, $formattedDate',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.black54,
                           ),
                         ),
                       ],
-                    ),
-                    Expanded(
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          color: Colors.white70,
-                          borderRadius: BorderRadius.only(
-                            bottomLeft: Radius.circular(15),
-                            bottomRight: Radius.circular(15),
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                news.title,
-                                style: const TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              Text(
-                                news.author,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.black54,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
                     ),
                   ],
                 ),
